@@ -1,6 +1,6 @@
 import sys
 import os
-
+import tempfile
 import streamlit as st
 
 
@@ -58,28 +58,90 @@ if "messages" not in st.session_state:
 # Load RAG service
 # --------------------------------------------------
 
-@st.cache_resource
-def load_rag_service():
+if "rag_service" not in st.session_state:
+    with st.spinner("Loading embedding and reranking models..."):
+        st.session_state.rag_service = RAGService()
 
-    return RAGService()
-
-
-with st.spinner(
-    "Loading embedding and reranking models..."
-):
-
-    rag_service = load_rag_service()
+rag_service = st.session_state.rag_service
 
 
 # --------------------------------------------------
 # Document information
 # --------------------------------------------------
 
-st.info(
-    "📚 Current document: Metformin drug label "
-    "(DailyMed/NLM)"
+if rag_service.document_name == "metformin.pdf":
+    st.info(
+        "📚 **Demo document:** metformin.pdf"
+    )
+else:
+    st.success(
+        f"📄 **Uploaded document:** "
+        f"{rag_service.document_name}"
+    )
+
+if st.button("↩️ Reset to Metformin Demo"):
+    rag_service.reset_to_default()
+
+    st.session_state.processed_file_id = None
+    st.session_state.current_document = "metformin.pdf"
+    st.session_state.messages = []
+
+    st.session_state.uploader_key += 1
+
+    st.success("Reset to the Metformin demo document.")
+    st.rerun()
+
+st.subheader("📄 Upload a PDF")
+
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0
+
+uploaded_file = st.file_uploader(
+    "Drag and drop a PDF here",
+    type=["pdf"],
+    key=f"pdf_uploader_{st.session_state.uploader_key}"
 )
 
+if uploaded_file is not None:
+    file_id = f"{uploaded_file.name}:{uploaded_file.size}"
+
+    if st.session_state.get("processed_file_id") != file_id:
+        with st.spinner(
+            f"Processing {uploaded_file.name}..."
+        ):
+            temp_path = None
+
+            try:
+                with tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=".pdf"
+                ) as temp_file:
+                    temp_file.write(uploaded_file.getvalue())
+                    temp_path = temp_file.name
+
+                result = rag_service.load_uploaded_document(
+                    temp_path,
+                    uploaded_file.name
+                )
+
+                st.session_state.processed_file_id = file_id
+                st.session_state.current_document = uploaded_file.name
+                st.session_state.messages = []
+
+                st.success(
+                    f"Loaded **{uploaded_file.name}** — "
+                    f"{result['pages']} pages, "
+                    f"{result['chunks']} chunks."
+                )
+
+            except Exception as error:
+                st.error(
+                    f"Could not process the PDF: {error}"
+                )
+
+            finally:
+                if temp_path and os.path.exists(temp_path):
+                    os.remove(temp_path)
 
 # --------------------------------------------------
 # Display previous conversation

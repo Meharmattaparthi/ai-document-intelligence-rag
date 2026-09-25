@@ -17,12 +17,10 @@ def load_chunks(file_path):
     return chunks
 
 
-def create_embeddings(chunks):
-    """Convert text chunks into numerical embeddings."""
-
-    print("Loading embedding model...")
-
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+def create_embeddings(chunks, model=None):
+    if model is None:
+        print("Loading embedding model...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
 
     texts = [chunk["text"] for chunk in chunks]
 

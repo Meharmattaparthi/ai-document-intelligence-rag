@@ -56,6 +56,8 @@ Answer + Source Pages
 * Retrieval evaluation
 * Local retrieval testing without requiring an LLM API call
 * Graceful handling of Gemini API quota errors
+* **Dynamic PDF Upload:** Upload a new PDF through the Streamlit interface and automatically run the document through text extraction, chunking, embedding generation, semantic retrieval, and CrossEncoder reranking.
+* **Document Reset:** Reset the active document back to the bundled Metformin demonstration document.
 
 ---
 

@@ -18,6 +18,10 @@ from src.rag.rag_pipeline import (
     generate_answer
 )
 
+from src.ingestion.document_loader import extract_text_from_pdf
+from src.processing.text_chunker import create_chunks
+from src.embeddings.embed_chunks import create_embeddings
+
 
 class RAGService:
     """Reusable local RAG retrieval service."""
@@ -36,9 +40,61 @@ class RAGService:
         print("Loading document data...")
         self.embeddings, self.metadata = load_data()
 
-        print(
-            f"Loaded {len(self.metadata)} document chunks."
+        self.document_name = "metformin.pdf"
+
+        print(f"Loaded {len(self.metadata)} document chunks.")
+
+    def load_uploaded_document(self, pdf_path, document_name):
+        print(f"Loading uploaded document: {document_name}")
+
+        # 1. Extract PDF text
+        pages = extract_text_from_pdf(pdf_path)
+
+        # 2. Clean and split into chunks
+        chunks = create_chunks(
+            pages,
+            document_name=document_name
         )
+
+        if not chunks:
+            raise ValueError(
+                "No readable text was found in the uploaded PDF."
+            )
+
+        # 3. Create embeddings using the already-loaded model
+        embeddings = create_embeddings(
+            chunks,
+            model=self.embedding_model
+        )
+
+        # 4. Replace the active document in memory
+        self.embeddings = embeddings
+        self.metadata = chunks
+        self.document_name = document_name
+
+        print(
+            f"Uploaded document processed successfully: "
+            f"{len(pages)} pages, {len(chunks)} chunks."
+        )
+
+        return {
+            "document_name": document_name,
+            "pages": len(pages),
+            "chunks": len(chunks)
+        }
+    
+    def reset_to_default(self):
+        """Reset the active document to the bundled Metformin demo."""
+
+        self.embeddings, self.metadata = load_data()
+        self.document_name = "metformin.pdf"
+
+        print("Reset to default Metformin demo document.")
+
+        return {
+            "document_name": self.document_name,
+            "chunks": len(self.metadata)
+        }
 
     def retrieve(self, query, top_k=5, candidate_k=20):
         """Retrieve and rerank relevant document chunks."""

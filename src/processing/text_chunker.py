@@ -50,7 +50,12 @@ def detect_section(text):
     return "GENERAL"
 
 
-def create_chunks(pages, chunk_size=1500, overlap=200):
+def create_chunks(
+    pages,
+    document_name="document.pdf",
+    chunk_size=1500,
+    overlap=200
+):
     chunks = []
 
     important_sections = [
@@ -84,7 +89,6 @@ def create_chunks(pages, chunk_size=1500, overlap=200):
 
             upper_line = line.upper()
 
-            # Detect a section heading when it appears as a complete line.
             detected_section = None
 
             for section in important_sections:
@@ -92,11 +96,10 @@ def create_chunks(pages, chunk_size=1500, overlap=200):
                     detected_section = section
                     break
 
-            # If a new section starts, save the previous content first.
             if detected_section:
                 if current_text.strip():
                     chunks.append({
-                        "document": "metformin.pdf",
+                        "document": document_name,
                         "page_number": page["page_number"],
                         "section": current_section,
                         "text": current_text.strip()
@@ -107,16 +110,14 @@ def create_chunks(pages, chunk_size=1500, overlap=200):
 
                 continue
 
-            # Add normal content to the current chunk.
             if current_text:
                 current_text += "\n" + line
             else:
                 current_text = line
 
-            # Apply chunk-size limit.
             if len(current_text) >= chunk_size:
                 chunks.append({
-                    "document": "metformin.pdf",
+                    "document": document_name,
                     "page_number": page["page_number"],
                     "section": current_section,
                     "text": current_text.strip()
@@ -125,10 +126,9 @@ def create_chunks(pages, chunk_size=1500, overlap=200):
                 overlap_text = current_text[-overlap:]
                 current_text = overlap_text
 
-        # Save remaining text from the page.
         if current_text.strip():
             chunks.append({
-                "document": "metformin.pdf",
+                "document": document_name,
                 "page_number": page["page_number"],
                 "section": current_section,
                 "text": current_text.strip()
@@ -155,7 +155,10 @@ if __name__ == "__main__":
 
     pages = extract_text_from_pdf(pdf_path)
 
-    chunks = create_chunks(pages)
+    chunks = create_chunks(
+        pages,
+        document_name="metformin.pdf"
+    )
 
     output_path = "data/processed/metformin_chunks.json"
 

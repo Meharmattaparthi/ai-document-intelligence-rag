@@ -16,25 +16,28 @@ For demonstration, the project uses a **Metformin drug label from DailyMed/NLM**
 
 The system follows this pipeline:
 
-> PDF Document
->      ↓
-> Text Extraction
->      ↓
-> Text Cleaning & Chunking
->      ↓
-> Sentence Transformer Embeddings
->      ↓
-> Semantic Similarity Retrieval
->      ↓
-> CrossEncoder Reranking
->      ↓
-> Top Relevant Document Chunks
->      ↓
-> Grounded Prompt Construction
->      ↓
-> Gemini LLM
->      ↓
-> Answer + Source Pages
+```
+PDF Document
+↓
+
+Text Extraction
+↓
+Text Cleaning & Chunking
+↓
+Sentence Transformer Embeddings
+↓
+Semantic Similarity Retrieval
+↓
+CrossEncoder Reranking
+↓
+Top Relevant Document Chunks
+↓
+Grounded Prompt Construction
+↓
+Gemini LLM
+↓
+Answer + Source Pages
+```
 
 ---
 
@@ -88,47 +91,47 @@ The system follows this pipeline:
 
 ## 📁 Project Structure
 
-> ai-document-intelligence-rag/
-> │
-> ├── app/
-> │   └── app.py
-> │
-> ├── data/
-> │   ├── raw/
-> │   └── processed/
-> │
-> ├── notebooks/
-> │
-> ├── src/
-> │   ├── ingestion/
-> │   │   └── document_loader.py
-> │   │
-> │   ├── processing/
-> │   │   └── text_chunker.py
-> │   │
-> │   ├── embeddings/
-> │   │   └── embed_chunks.py
-> │   │
-> │   ├── retrieval/
-> │   │   └── semantic_search.py
-> │   │
-> │   ├── rag/
-> │   │   ├── rag_pipeline.py
-> │   │   └── rag_service.py
-> │   │
-> │   └── evaluation/
-> │       ├── evaluate_retrieval.py
-> │       ├── evaluate_rag.py
-> │       └── rag_evaluation_questions.json
-> │
-> ├── tests/
-> │   └── test_rag_local.py
-> │
-> ├── .gitignore
-> ├── requirements.txt
-> └── README.md
-
----
+```
+ ai-document-intelligence-rag/
+ │
+ ├── app/
+ │   └── app.py
+ │
+ ├── data/
+ │   ├── raw/
+ │   └── processed/
+ │
+ ├── notebooks/
+ │
+ ├── src/
+ │   ├── ingestion/
+ │   │   └── document_loader.py
+ │   │
+ │   ├── processing/
+ │   │   └── text_chunker.py
+ │   │
+ │   ├── embeddings/
+ │   │   └── embed_chunks.py
+ │   │
+ │   ├── retrieval/
+ │   │   └── semantic_search.py
+ │   │
+ │   ├── rag/
+ │   │   ├── rag_pipeline.py
+ │   │   └── rag_service.py
+ │   │
+ │   └── evaluation/
+ │       ├── evaluate_retrieval.py
+ │       ├── evaluate_rag.py
+ │       └── rag_evaluation_questions.json
+ │
+ ├── tests/
+ │   └── test_rag_local.py
+ │
+ ├── .gitignore
+ ├── requirements.txt
+ └── README.md
+```
 
 ## ⚙️ Installation
 
@@ -141,15 +144,21 @@ cd ai-document-intelligence-rag
 
 Create a virtual environment:
 
-> python -m venv .venv
+```
+python -m venv .venv
+```
 
 Activate the environment on Windows:
 
-> .venv\Scripts\activate
+```
+.venv\Scripts\activate
+```
 
 Install dependencies:
 
-> pip install -r requirements.txt
+```
+pip install -r requirements.txt
+```
 
 ---
 
@@ -157,7 +166,9 @@ Install dependencies:
 
 Create a **.env** file in the project root:
 
-> GEMINI_API_KEY=your_api_key_here
+```
+GEMINI_API_KEY=your_api_key_here
+```
 
 The API key is loaded using **python-dotenv**.
 
@@ -171,7 +182,9 @@ The **.gitignore** configuration excludes **.env** files from version control.
 
 The current demonstration uses:
 
-> data/raw/metformin.pdf
+```
+data/raw/metformin.pdf
+```
 
 The document is processed through the following stages.
 
@@ -208,7 +221,9 @@ The retrieval system uses a two-stage approach.
 
 Each document chunk is converted into an embedding using:
 
-> all-MiniLM-L6-v2
+```
+all-MiniLM-L6-v2
+```
 
 The query is also embedded and compared with the document embeddings using vector similarity.
 
@@ -218,11 +233,15 @@ The most relevant candidates are selected.
 
 The candidate chunks are reranked using:
 
-> cross-encoder/ms-marco-MiniLM-L-6-v2
+```
+cross-encoder/ms-marco-MiniLM-L-6-v2
+```
 
 This provides a more detailed relevance comparison between:
 
-> User Query ↔ Retrieved Document Chunk
+```
+User Query ↔ Retrieved Document Chunk
+```
 
 The highest-ranked chunks are then passed to the generation stage.
 
@@ -249,7 +268,9 @@ The application then sends the grounded prompt to Gemini.
 
 Run the application with:
 
-> streamlit run app/app.py
+```
+streamlit run app/app.py
+```
 
 The application provides:
 
@@ -270,7 +291,9 @@ The project includes a local test that does not call the Gemini API.
 
 Run:
 
-> python tests/test_rag_local.py
+```
+python tests/test_rag_local.py
+```
 
 This verifies:
 
@@ -332,17 +355,19 @@ The evaluation set currently contains only six questions.
 
 Example questions that can be asked in the application:
 
-> What are the contraindications of metformin?
->
-> What are the risk factors for lactic acidosis?
->
-> What is the recommended starting dose of metformin?
->
-> What are the important drug interactions?
->
-> What are the recommendations for renal impairment?
->
-> What are the common adverse reactions?
+```
+What are the contraindications of metformin?
+
+What are the risk factors for lactic acidosis?
+
+What is the recommended starting dose of metformin?
+
+What are the important drug interactions?
+
+What are the recommendations for renal impairment?
+
+What are the common adverse reactions?
+```
 
 ---
 
